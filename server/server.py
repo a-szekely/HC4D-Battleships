@@ -1,5 +1,6 @@
 import math
 import random
+import json
 
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
@@ -35,7 +36,9 @@ class Shot(Resource):
     def post(self):
         print('Request sent')
         print(request)
-        payload = request.get_json()
+        print(request.data)
+        payload = json.loads(request.data.decode())
+        print('Payload', payload)
         player = payload['player']
         x = payload['x']
         y = payload['y']
@@ -43,9 +46,10 @@ class Shot(Resource):
         if player == 'ai':
             result = '1'if check_hit(float(x), float(y), player1_ships) else '0'
             print('AI move:', x, y, result)
-            return jsonify({
-                'result': result,
-            })
+            #return jsonify({
+            #    'result': result,
+            #})
+            return result
 
         else:
             result = '1'if check_hit(float(x), float(y), player2_ships) else '0'
