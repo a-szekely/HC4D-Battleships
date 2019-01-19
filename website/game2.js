@@ -4,18 +4,22 @@ var config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
     scene: {
-        create: create
+        create: create,
+        drawShot: drawShot
     }
 };
 
 var game = new Phaser.Game(config);
+var graphics;
 
 function create ()
 {
-    var graphics = this.add.graphics({ lineStyle: { width: 2, color: 0x2266aa }, fillStyle: { color: 0x2266aa } });
+    graphics = this.add.graphics({ lineStyle: { width: 2, color: 0x2266aa }, fillStyle: { color: 0x2266aa } });
 
      var ships = [
         [[50, 50], [300, 50]],
+         [[50, 80], [300, 80]],
+         [[100, 150], [300, 150]],
         [[300, 200], [500, 200]]
     ];
 
@@ -38,4 +42,15 @@ function create ()
             }            
         }
     }
+}
+
+function drawShot(x, y, hit){
+    var color;
+    if (hit){
+        color = 0xD32F2F;
+    } else{
+        color = 0xffffff;   
+    }
+    graphics.fillStyle(color);
+    graphics.fillCircle(x, y, 10);   
 }

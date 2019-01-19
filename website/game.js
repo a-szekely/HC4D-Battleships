@@ -1,3 +1,5 @@
+var request = require('request');
+
 var config = {
     width: 600,
     height: 600,
@@ -7,6 +9,7 @@ var config = {
         create: create
     }
 };
+
 
 var game = new Phaser.Game(config);
 
@@ -23,7 +26,9 @@ function create ()
     ];
     
     var ships = [
-        [[50, 50], [300, 50]],
+         [[50, 50], [300, 50]],
+         [[50, 80], [300, 80]],
+         [[100, 150], [300, 150]],
         [[300, 200], [500, 200]]
     ];
 
@@ -37,15 +42,30 @@ function create ()
     this.input.on('pointerdown', function(pointer) {
         console.log(pointer.x, pointer.y);
         points.push(new Phaser.Geom.Point(pointer.x, pointer.y));
-        if (isAHit(pointer.x, pointer.y)){
-            points_colours.push(0xD32F2F);
-        } else{
-            points_colours.push(0xffffff);
-        }
-        
-        graphics.fillStyle(0x999999);
-        graphics.fillCircle(pointer.x, pointer.y, 10);
-
+    
+        request
+        .post('http://localhost:5002/shot/', {
+            json: {
+                player:"xyz",
+                x:pointer.x.toString(), 
+                y:pointer.y.toString()
+            }
+         }, (error, res, body) => {
+            if (error) {
+                console.error(error)
+                return
+            }
+            console.log(body);
+            drawShot(body.ai_move[0], body.ai_move[1], isAHit(body.ai_move[0], body.ai_move[1]));
+            if (body.response=='1'){
+                points_colours.push(0xD32F2F);
+            } else{
+                points_colours.push(0xffffff);   
+            }
+            graphics.fillStyle(0x999999);
+            graphics.fillCircle(pointer.x, pointer.y, 10);
+          })
+       
         //redraw();
     });
 
