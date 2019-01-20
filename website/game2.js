@@ -12,6 +12,9 @@ var config = {
 var game = new Phaser.Game(config);
 var graphics;
 
+var sunk_mine = []
+
+
 function create ()
 {
     graphics = this.add.graphics({ lineStyle: { width: 2, color: 0x2266aa }, fillStyle: { color: 0x2266aa } });
@@ -29,6 +32,7 @@ function create ()
         [[350, 450], [530, 450]],
         [[30, 550], [410, 550]],
     ]
+     
 
     redraw();
 
@@ -40,6 +44,12 @@ function create ()
         {
             graphics.fillStyle(0xffffff);
             graphics.fillRoundedRect(ships[i][0][0] - 10, ships[i][0][1] - 10, ships[i][1][0] - ships[i][0][0] + 20, 20, 10);      
+        }
+        
+         for(var i = 0; i < sunk_mine.length; i++)
+        {
+            graphics.fillStyle(0x820000);
+            graphics.fillRoundedRect(sunk[i][0][0] - 10, sunk[i][0][1] - 10, sunk[i][1][0] - sunk[i][0][0] + 20, 20, 10);
         }
     }
 }
@@ -53,4 +63,10 @@ function drawShot(x, y, hit){
     }
     graphics.fillStyle(color);
     graphics.fillCircle(x, y, 20);   
+}
+
+function sunkShip(ship){
+    sunk_mine.push(ship);
+    graphics.fillStyle(0xB71C1C);
+    graphics.fillRoundedRect(ship[0][0] - 10, ship[0][1] - 10, ship[1][0] - ship[0][0] + 20, 20, 10); 
 }

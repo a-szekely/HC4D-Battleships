@@ -1,8 +1,8 @@
 import numpy as np
 import GPy
 
-GAME_BOARD_SIZE = 10
-BOMB_RADIUS = 0.5
+GAME_BOARD_SIZE = 600
+BOMB_RADIUS = 20
 
 
 def pick_bomb_location(guess_history, success_history):

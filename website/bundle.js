@@ -75,10 +75,14 @@ function create ()
             graphics.fillStyle(0x999999);
             graphics.fillCircle(pointer.x, pointer.y, 20);
             if (body.sunk=='1'){
-                var ship = body.ship;
+                var ship = body.sunk_ship;
                 sunk.push(ship);
                 graphics.fillStyle(0xB71C1C);
                 graphics.fillRoundedRect(ship[0][0] - 10, ship[0][1] - 10, ship[1][0] - ship[0][0] + 20, 20, 10);
+            }
+            
+            if (body.ai_sunk.length > 0){
+                sunkShip(body.ai_sunk)
             }
           })
        

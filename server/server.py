@@ -33,7 +33,7 @@ def get_flags(ships):
     return flags, flags_hit
 
 ai_moves = [[10, 50],
-             [50, 50],
+             [75, 50],
              [40, 100],
              ]
 ai_moves_hit = [False,
@@ -112,8 +112,16 @@ class Shot(Resource):
                 ai_move = ai_moves[current_ai_move[0]]
             else:
                 ai_move = [random.random()*600, random.random()*600]
-            sunk, ai_sunk_ship = check_sunk(ai_move[0], ai_move[1], 1)
+            ai_sunk, ai_sunk_ship = check_sunk(ai_move[0], ai_move[1], 1)
             current_ai_move[0] += 1
+            print('Current AI move', current_ai_move)
+
+            # Get new AI move
+            loc = pick_bomb_location(ai_moves, ai_moves_hit)
+            point = loc[0].tolist()
+            print(m, point)
+            ai_moves.append(point)
+            ai_moves_hit.append(check_hit(point[0], point[1], ships[0]))
 
             if check_won_player(0):
                 winner = 'user'
@@ -154,6 +162,7 @@ def check_sunk(x, y, player):
                 for b in flags_hit[player][i]:
                     if not b:
                         return '0', []
+                print('Sunk', ships[player][i])
                 return '1', ships[player][i]
     return '0', []
 
@@ -198,13 +207,15 @@ def distanceToLineSegment(x, y, x1, y1, x2, y2):
 
 
 
+for m in range(50):
+    loc = pick_bomb_location(ai_moves, ai_moves_hit)
+    point = loc[0].tolist()
+    print(m, point)
+    ai_moves.append(point)
+    ai_moves_hit.append(check_hit(point[0], point[1], ships[0]))
 
 if __name__ == '__main__':
     app.run(port=5002)
 
-    for m in range(100):
-        loc = pick_bomb_location(ai_moves, ai_moves_hit)
-        ai_moves.append(loc)
-        ai_moves_hit.append(check_hit(loc[0], loc[1], ships[0]))
 
-    print(ai_moves)
+
