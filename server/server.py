@@ -113,15 +113,24 @@ class Shot(Resource):
             else:
                 ai_move = [random.random()*600, random.random()*600]
             ai_sunk, ai_sunk_ship = check_sunk(ai_move[0], ai_move[1], 1)
+            if ai_sunk == '1':
+                for i, m in enumerate(ai_moves):
+                    dist = distanceToLineSegment(m[0], m[1], ai_sunk_ship[0][0], ai_sunk_ship[0][1], ai_sunk_ship[1][0], ai_sunk_ship[1][1])
+                    if (dist < 30):
+                        ai_moves_hit[i] = False
+
             current_ai_move[0] += 1
             print('Current AI move', current_ai_move)
 
             # Get new AI move
-            loc = pick_bomb_location(ai_moves, ai_moves_hit)
-            point = loc[0].tolist()
-            print(m, point)
-            ai_moves.append(point)
-            ai_moves_hit.append(check_hit(point[0], point[1], ships[0]))
+            try:
+                loc = pick_bomb_location(ai_moves, ai_moves_hit)
+                point = loc[0].tolist()
+                print(m, point)
+                ai_moves.append(point)
+                ai_moves_hit.append(check_hit(point[0], point[1], ships[0]))
+            except:
+                pass
 
             if check_won_player(0):
                 winner = 'user'
