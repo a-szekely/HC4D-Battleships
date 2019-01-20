@@ -27,11 +27,20 @@ function create ()
     ];
     
     var ships = [
-         [[50, 50], [300, 50]],
-         [[50, 80], [300, 80]],
-         [[100, 150], [300, 150]],
-        [[300, 200], [500, 200]]
+        [[50, 50], [80, 50]],
+        [[450, 50], [530, 50]],
+        [[50, 100], [130, 100]],
+        [[100, 150], [280, 150]],
+        [[200, 200], [580, 200]],
+        [[50, 300], [230, 300]],
+        [[70, 350], [100, 350]],
+        [[450, 350], [480, 350]],
+        [[210, 400], [290, 400]],
+        [[350, 450], [530, 450]],
+        [[30, 550], [410, 550]],
     ];
+    
+    var sunk = [];
 
     this.input.on('pointermove', function(pointer) {
 
@@ -58,13 +67,19 @@ function create ()
             }
             console.log(body);
             drawShot(body.ai_move[0], body.ai_move[1], isAHit(body.ai_move[0], body.ai_move[1]));
-            if (body.response=='1'){
+            if (body.hit=='1'){
                 points_colours.push(0xD32F2F);
             } else{
-                points_colours.push(0xffffff);   
+                points_colours.push(0x999999);   
             }
             graphics.fillStyle(0x999999);
-            graphics.fillCircle(pointer.x, pointer.y, 10);
+            graphics.fillCircle(pointer.x, pointer.y, 20);
+            if (body.sunk=='1'){
+                var ship = body.ship;
+                sunk.push(ship);
+                graphics.fillStyle(0xB71C1C);
+                graphics.fillRoundedRect(ship[0][0] - 10, ship[0][1] - 10, ship[1][0] - ship[0][0] + 20, 20, 10);
+            }
           })
        
         //redraw();
@@ -73,7 +88,7 @@ function create ()
     redraw();
     
     function isAHit(x, y){
-        var max_dist = 20;
+        var max_dist = 30;
         for(var i = 0; i < ships.length; i++)
         {
             var flags = ships[i];
@@ -95,14 +110,20 @@ function create ()
         //graphics.strokeRectShape(rect);
         
         graphics.fillStyle(0x444444);
-        graphics.fillCircle(points[0].x, points[0].y, 10);
+        graphics.fillCircle(points[0].x, points[0].y, 20);
         
 
         for(var i = 1; i < points.length; i++)
         {
             graphics.fillPointShape(points[i], 10);
             graphics.fillStyle(points_colours[i]);
-            graphics.fillCircle(points[i].x, points[i].y, 10);
+            graphics.fillCircle(points[i].x, points[i].y, 20);
+        }
+        
+        for(var i = 0; i < sunk.length; i++)
+        {
+            graphics.fillStyle(0x820000);
+            graphics.fillRoundedRect(sunk[i][0][0] - 10, sunk[i][0][1] - 10, sunk[i][1][0] - sunk[i][0][0] + 20, 20, 10);
         }
     }
 }

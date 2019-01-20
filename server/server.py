@@ -13,6 +13,24 @@ api = Api(app)
 
 CORS(app)
 
+
+def get_flags(ships):
+    flags = []
+    flags_hit = []
+    for ship in ships:
+        num = (ship[1][0] - ship[0][0] + 20) // 50
+        start = ship[0]
+        f = []
+        f_hit = []
+        for i in range(num):
+            f.append([start[0] + i * 50 + 25, start[1]])
+            f_hit.append(False)
+        flags.append(f)
+        flags_hit.append(f_hit)
+
+    print(flags)
+    return flags, flags_hit
+
 player1_moves = [[10, 50],
                  [50, 50],
                  [100, 50],
@@ -21,14 +39,40 @@ player1_moves = [[10, 50],
                  ]
 player2_moves = []
 
-player1_ships = [
-        [[50, 50], [300, 50]],
-        [[300, 200], [500, 200]]
+ships = [
+    [
+        [[50, 50], [80, 50]],
+        [[450, 50], [530, 50]],
+        [[50, 100], [130, 100]],
+        [[100, 150], [280, 150]],
+        [[200, 200], [580, 200]],
+        [[50, 300], [230, 300]],
+        [[70, 350], [100, 350]],
+        [[450, 350], [480, 350]],
+        [[210, 400], [290, 400]],
+        [[350, 450], [530, 450]],
+        [[30, 550], [410, 550]],
+    ],
+    [
+        [[50, 50], [80, 50]],
+        [[450, 50], [530, 50]],
+        [[50, 100], [130, 100]],
+        [[100, 150], [280, 150]],
+        [[200, 200], [580, 200]],
+        [[50, 300], [230, 300]],
+        [[70, 350], [100, 350]],
+        [[450, 350], [480, 350]],
+        [[210, 400], [290, 400]],
+        [[350, 450], [530, 450]],
+        [[30, 550], [410, 550]],
     ]
-player2_ships = [
-        [[50, 50], [300, 50]],
-        [[300, 200], [500, 200]]
-    ]
+]
+
+flags = [get_flags(ships[0])[0], get_flags(ships[1])[0]]
+flags_hit = [get_flags(ships[0])[1], get_flags(ships[1])[1]]
+
+print(flags, flags_hit)
+
 
 current_ai_move = [0]
 
@@ -44,36 +88,54 @@ class Shot(Resource):
         y = payload['y']
 
         if player == 'ai':
-            result = '1'if check_hit(float(x), float(y), player1_ships) else '0'
+            result = '1'if check_hit(float(x), float(y), ships[0]) else '0'
             print('AI move:', x, y, result)
+            sunk = '1' if check_sunk(float(x), float(y), 0) else '0'
             #return jsonify({
             #    'result': result,
             #})
-            return result
+            return result + sunk
 
         else:
-            result = '1'if check_hit(float(x), float(y), player2_ships) else '0'
+            result = '1'if check_hit(float(x), float(y), ships[1]) else '0'
+            sunk, ship = check_sunk(float(x), float(y), 0)
             if current_ai_move[0] < len(player1_moves):
                 ai_move = player1_moves[current_ai_move[0]]
             else:
-                ai_move = [random.random()*800, random.random()*800]
+                ai_move = [random.random()*600, random.random()*600]
             current_ai_move[0] += 1
 
             return jsonify({
-                'response': result,
-                'ai_move': ai_move
+                'hit': result,
+                'sunk': sunk,
+                'ai_move': ai_move,
+                'ship': ship
             })
 
 api.add_resource(Shot, '/shot/')
 
 
 def check_hit(x, y, ships):
-    max_dist = 20
-    for flags in ships:
-        dist = distanceToLineSegment(x, y, flags[0][0], flags[0][1], flags[1][0], flags[1][1])
+    max_dist = 30
+    for ends in ships:
+        dist = distanceToLineSegment(x, y, ends[0][0], ends[0][1], ends[1][0], ends[1][1])
         if (dist < max_dist):
             return True
     return False
+
+def check_sunk(x, y, player):
+    for i, f in enumerate(flags[player]):
+        for j, flag in enumerate(f):
+            dx = flag[0]-x
+            dy = flag[1]-y
+            dist = math.sqrt(dx * dx + dy * dy)
+            if dist < 20:
+                flags_hit[player][i][j] = True
+                for b in flags_hit[player][i]:
+                    if not b:
+                        return '0', []
+                return '1', ships[player][i]
+    return '0', []
 
 
 def distanceToLineSegment(x, y, x1, y1, x2, y2):
