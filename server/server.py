@@ -7,6 +7,7 @@ from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api
 from flask_jsonpify import jsonify
 
+from adversary import pick_bomb_location
 
 app = Flask(__name__)
 api = Api(app)
@@ -31,12 +32,13 @@ def get_flags(ships):
     print(flags)
     return flags, flags_hit
 
-player1_moves = [[10, 50],
-                 [50, 50],
-                 [100, 50],
-                 [150, 50],
-                 [100, 50],
-                 ]
+ai_moves = [[10, 50],
+             [50, 50],
+             [40, 100],
+             ]
+ai_moves_hit = [False,
+                True,
+                True]
 player2_moves = []
 
 ships = [
@@ -76,6 +78,8 @@ print(flags, flags_hit)
 
 current_ai_move = [0]
 
+
+
 class Shot(Resource):
     def post(self):
         print('Request sent')
@@ -88,31 +92,47 @@ class Shot(Resource):
         y = payload['y']
 
         if player == 'ai':
-            result = '1'if check_hit(float(x), float(y), ships[0]) else '0'
-            print('AI move:', x, y, result)
+            ai_moves.append(())
+            hit = check_hit(float(x), float(y), ships[0])
+            result = '1'if hit else '0'
             sunk = '1' if check_sunk(float(x), float(y), 0) else '0'
+            print('AI move:', x, y, result)
+            ai_moves.append([float(x),float(y)])
+            ai_moves_hit.append(hit)
             #return jsonify({
             #    'result': result,
             #})
+
             return result + sunk
 
         else:
             result = '1'if check_hit(float(x), float(y), ships[1]) else '0'
             sunk, ship = check_sunk(float(x), float(y), 0)
-            if current_ai_move[0] < len(player1_moves):
-                ai_move = player1_moves[current_ai_move[0]]
+            if current_ai_move[0] < len(ai_moves):
+                ai_move = ai_moves[current_ai_move[0]]
             else:
                 ai_move = [random.random()*600, random.random()*600]
+            sunk, ai_sunk_ship = check_sunk(ai_move[0], ai_move[1], 1)
             current_ai_move[0] += 1
+
+            if check_won_player(0):
+                winner = 'user'
+            elif check_won_player(1):
+                winner = 'ai'
+            else:
+                winner = '0'
 
             return jsonify({
                 'hit': result,
                 'sunk': sunk,
                 'ai_move': ai_move,
-                'ship': ship
+                'sunk_ship': ship,
+                'ai_sunk': ai_sunk_ship
             })
 
 api.add_resource(Shot, '/shot/')
+
+
 
 
 def check_hit(x, y, ships):
@@ -136,6 +156,15 @@ def check_sunk(x, y, player):
                         return '0', []
                 return '1', ships[player][i]
     return '0', []
+
+
+def check_won_player(player):
+    for i, f in enumerate(flags[player]):
+        for j, flag in enumerate(f):
+            if not flags_hit[player][i][j]:
+                return False
+    return True
+
 
 
 def distanceToLineSegment(x, y, x1, y1, x2, y2):
@@ -172,3 +201,10 @@ def distanceToLineSegment(x, y, x1, y1, x2, y2):
 
 if __name__ == '__main__':
     app.run(port=5002)
+
+    for m in range(100):
+        loc = pick_bomb_location(ai_moves, ai_moves_hit)
+        ai_moves.append(loc)
+        ai_moves_hit.append(check_hit(loc[0], loc[1], ships[0]))
+
+    print(ai_moves)
